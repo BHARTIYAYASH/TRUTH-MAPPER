@@ -1,0 +1,170 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the Argument Atlas application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "username": {
+          "type": "string",
+          "description": "The user's username."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "creationDate": {
+          "type": "string",
+          "description": "The date and time the user account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "creationDate"
+      ]
+    },
+    "ArgumentMap": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ArgumentMap",
+      "type": "object",
+      "description": "Represents a saved argument analysis history for a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ArgumentMap entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "ID of the user who owns this analysis."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the analysis, usually the initial query or topic."
+        },
+        "creationDate": {
+          "type": "string",
+          "description": "The date and time the analysis was created.",
+          "format": "date-time"
+        },
+        "jsonData": {
+          "type": "string",
+          "description": "A JSON string containing the full analysis result, including the blueprint, summary, social pulse, and tweets."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "name",
+        "creationDate",
+        "jsonData"
+      ]
+    },
+    "Source": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Source",
+      "type": "object",
+      "description": "Represents a source document or URL used in an argument map.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Source entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Source)"
+        },
+        "url": {
+          "type": "string",
+          "description": "The URL of the source document.",
+          "format": "uri"
+        },
+        "uploadDate": {
+          "type": "string",
+          "description": "The date and time the source document was uploaded or added.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "url",
+        "uploadDate"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles. Uses path-based ownership for private user data. Includes the userId as a path parameter to denote ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/argumentMaps/{argumentMapId}",
+        "definition": {
+          "entityName": "ArgumentMap",
+          "schema": {
+            "$ref": "#/backend/entities/ArgumentMap"
+          },
+          "description": "Stores argument map analyses created by each user. Uses path-based ownership for access control.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who created the argument map."
+            },
+            {
+              "name": "argumentMapId",
+              "description": "The unique identifier of the argument map."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/sources/{sourceId}",
+        "definition": {
+          "entityName": "Source",
+          "schema": {
+            "$ref": "#/backend/entities/Source"
+          },
+          "description": "Stores sources used by each user. Uses path-based ownership for access control. Includes the userId and sourceId as path parameters to denote ownership.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the source."
+            },
+            {
+              "name": "sourceId",
+              "description": "The unique identifier of the source document."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to manage user data, argument maps, and sources within the Argument Atlas application, while adhering to the core design principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters). It uses denormalization to ensure security rules can be evaluated without `get()` calls, and segregates data based on access control needs. User data and associated entities (ArgumentMaps, Sources) are stored under user-specific paths (`/users/{userId}`).\n\nAuthorization Independence is achieved by storing all user-owned data under the /users/{userId} path. This eliminates the need to perform `get()` calls in the security rules to verify ownership. QAPs are supported by limiting `list` operations to the user's own data or using membership maps to explicitly control access to shared data.\n\nThe `/users/{userId}` collection stores user profiles.  The `/users/{userId}/argumentMaps/{argumentMapId}` and `/users/{userId}/sources/{sourceId}` collections store user-created content.  This structure enables path-based ownership, simplifying security rules and improving scalability."
+  }
+}

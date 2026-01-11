@@ -1,0 +1,27 @@
+# **App Name**: Argument Atlas
+
+## Core Features:
+
+- Multi-Modal Input & Dynamic Sourcing: The system accepts user input via topic query, URL submission, or document upload. It then initiates a dynamic retrieval process, scraping multiple relevant news articles from the web and gathering public sentiment/discourse from social media platforms, to build a comprehensive, real-time data corpus for analysis.
+- AI-Powered Argument Deconstruction & Synthesis: An integrated Large Language Model synthesizes and concisely presents information from diverse sources. It then meticulously deconstructs this content into its logical components: identifying the central Thesis, Supporting Claims, Counterclaims, and their corresponding Evidence. It also pinpoints Logical Fallacies and provides a unique Concluding Analysis for novel insights or overarching themes.
+- Structured "Blueprint" Output: The AI's analysis is delivered as a structured JSON object. This blueprint contains precise data points (e.g., `id`, `parentId`, `type`, `side`, `content`, `sourceText`) that enable flexible and consistent rendering across various visualization styles, ensuring data integrity for downstream applications.
+- Dynamic & Interactive Visualization Modes: The platform offers a range of interactive visualization styles, allowing users to choose how they explore the argument. The flagship Balanced View visually separates "for" and "against" arguments into distinct pillars, immediately clarifying the debate's structure. Other modes include Classic Tree, Top-Down Hierarchy, and Pillar View.
+- Verifiable Insights via Flippable Cards: Each element in the argument map is presented as an interactive, flippable card. This feature allows users to instantly reveal the original `sourceText` or a direct link to the source article behind any claim or evidence, fostering transparency and enabling immediate verification of information.
+- Export & Portability: Users can download their generated argument maps. This includes visual exports (e.g., image files of the current map view) for presentations and data exports (the raw JSON blueprint) for archiving, sharing, or re-importing into the system for further analysis.
+- Real-time Cursor Glow Effect: Implement a subtle, smoothly tracking glow effect following the cursor to enhance user engagement.
+
+## Style Guidelines:
+
+- Primary Color: Deep Slate (`#4A5568`) - Instead of a vibrant "tech blue," this dark, muted blue-gray feels serious, intellectual, and professional. It serves as a strong anchor for headlines and key elements without being as harsh as pure black.
+- Background Color: Soft Ivory (`#FDFDFB`) - This is a very light, warm off-white. It mimics the feel of high-quality paper, making it more soothing and "human" than a sterile, bright-white or cold-gray background. It's the perfect canvas for reading and analysis.
+- Accent Colors (For "Balanced View"): Accent (For/Support): Deep Sage Green (`#5A7D7C`)
+- Accent Colors (For "Balanced View"): Accent (Against/Counter): Warm Terracotta (`#B56A4A`)
+- Why: We avoid a simple "green/red" traffic light system, which can feel judgmental. This sophisticated, earthy palette is visually contrasting but harmonious. The green feels constructive, and the terracotta/rust color represents a different, but equally valid, viewpoint.
+- Highlight Color (Interactive): Muted Gold (`#C09A50`) - Used for buttons ("Analyze Arguments"), active selections, and interactive highlights. This gold is elegant, provides a clear call to action, and contrasts beautifully against both the Deep Slate and Soft Ivory.
+- Headline Font: 'Lora' (Serif) - To avoid the "computerized" feel of 'Space Grotesk', we'll use a modern, elegant serif font like 'Lora'. It gives the platform a sense of authority, trustworthiness, and academic polish, like a digital-first journal.
+- Body Font: 'Inter' (Sans-serif) - You were spot-on with 'Inter'. It's arguably the most readable and clean sans-serif font for UI design. It's perfect for all card content, labels, and smaller text, providing a minimalist and modern feel that balances the elegance of the 'Lora' headlines.
+- Card-Based Design: The core UI will be built on "cards" (the nodes for Thesis, Claim, etc.). These cards should have softly rounded corners and a very subtle, diffused drop shadow. This makes them feel like tangible, distinct objects on the "ivory" canvas, enhancing clarity.
+- Smooth Transitions & "Liveness": Layout Animation: When the user switches between visual styles (e.g., "Balanced View" to "Tree"), the nodes shouldn't just "snap" to their new positions. They should smoothly animate over 300-500ms using an `ease-in-out` transition. This makes the platform feel fluid and responsive.
+- Smooth Transitions & "Liveness": Card Flip: The "flip" interaction on the cards must be a smooth 3D transform, reinforcing the idea of "looking behind" the claim for the source.
+- Interactive Effects: Instead of a cursor-following glow (which can be distracting), interactive elements (nodes, buttons) should have a subtle "lift" or "glow" on hover. The card's shadow can become slightly larger, or its border can subtly brighten with the highlight color. This provides the "liveness" you want in a clean, minimalist way.
+- Glowing circular effect that subtly follows the cursor movement to add an interactive touch without being intrusive.

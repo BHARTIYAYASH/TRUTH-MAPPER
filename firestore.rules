@@ -1,0 +1,159 @@
+/**
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model where all user-generated
+ * content is stored within a private data tree associated with that user's ID.
+ * Access to any document or subcollection is granted only if the requesting user
+ * is the authenticated owner of that data tree. This approach ensures strong
+ * data isolation and privacy by default.
+ *
+ * Data Structure:
+ * All data is organized hierarchically under the top-level `/users` collection.
+ * Each user has a root document at `/users/{userId}`. All of their specific
+ * data, such as argument maps and sources, is stored in subcollections beneath
+ * this root document (e.g., `/users/{userId}/argumentMaps/{mapId}`).
+ *
+ * Key Security Decisions:
+ * - Default Deny: All operations are denied unless explicitly allowed.
+ * - No Public Data: There are no globally readable collections. All data requires
+ *   authentication and ownership.
+ * - User Listing Disabled: To protect user privacy and prevent scraping, listing
+ *   the documents in the top-level `/users` collection is explicitly forbidden.
+ * - Path-Based Authorization: Ownership is determined by the `{userId}` wildcard
+ *   in the document path, which is a fast and secure method that avoids costly
+ *   database reads (`get()` calls) within rules.
+ *
+ * Denormalization for Authorization:
+ * This ruleset relies on the path structure (`/users/{userId}`) to determine
+ * ownership. Additionally, it validates that documents created within a user's
+ * data tree contain a corresponding `userId` field. This ensures relational
+ * integrity and makes data ownership explicit both in the path and in the
+ * document's content.
+ *
+ * Structural Segregation:
+ * The data model segregates each user's data into their own document tree. This
+ * is a highly secure and performant pattern that prevents users from even
+ * attempting to access data outside their designated scope.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ----------------------------------------------------------------------
+    // Helper Functions
+    // ----------------------------------------------------------------------
+
+    /**
+     * Checks if the user is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * Checks if the authenticated user's UID matches the provided userId.
+     * This is the primary function for enforcing the ownership model.
+     * @param userId The user ID to check against the authenticated user.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * Checks for ownership on an existing document. Used for safe updates/deletes.
+     * A request to modify a non-existent document will be denied.
+     * @param userId The user ID of the document's owner.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    // --- Create Operation Helpers ---
+
+    /**
+     * Validates that a new User profile document has an 'id' field that
+     * matches the document's ID in the path.
+     * @param userId The user ID from the path.
+     */
+    function isCreatingOwnProfile(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * Validates that a new document in a user subcollection has a 'userId'
+     * field that matches the owner's ID from the path.
+     * @param userId The user ID from the path.
+     */
+    function isCreatingOwnSubcollectionDoc(userId) {
+      return request.resource.data.userId == userId;
+    }
+
+    // --- Update Operation Helpers ---
+
+    /**
+     * Validates that the 'id' field of a User profile is immutable.
+     */
+    function isUserIdImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+
+    /**
+     * Validates that the 'userId' field of a subcollection document is immutable.
+     */
+    function isOwnerIdImmutable() {
+      return request.resource.data.userId == resource.data.id;
+    }
+
+
+    // ----------------------------------------------------------------------
+    // Collection Rules
+    // ----------------------------------------------------------------------
+
+    /**
+     * @description Manages user profile documents.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user can create their own user profile document.
+     * @deny (list) No user can list all documents in the `/users` collection.
+     * @deny (update) User 'bob' cannot update user 'alice's profile.
+     * @principle Restricts access to a user's own data tree and allows self-creation of a profile.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isOwner(userId) && isCreatingOwnProfile(userId);
+      allow update: if isExistingOwner(userId) && isUserIdImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages argument maps, which are private to each user.
+     * @path /users/{userId}/argumentMaps/{argumentMapId}
+     * @allow (create) User 'alice' can create a new argument map under `/users/alice/argumentMaps`.
+     * @allow (list) User 'alice' can list all of her own argument maps.
+     * @deny (get) User 'bob' cannot read an argument map belonging to 'alice'.
+     * @principle Enforces strict document ownership within a user's private subcollection.
+     */
+    match /users/{userId}/argumentMaps/{argumentMapId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isCreatingOwnSubcollectionDoc(userId);
+      allow update: if isExistingOwner(userId) && isOwnerIdImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Manages sources (e.g., URLs), which are private to each user.
+     * @path /users/{userId}/sources/{sourceId}
+     * @allow (create) User 'alice' can create a new source under `/users/alice/sources`.
+     * @allow (list) User 'alice' can list all of her own sources.
+     * @deny (delete) User 'bob' cannot delete a source belonging to 'alice'.
+     * @principle Enforces strict document ownership within a user's private subcollection.
+     */
+    match /users/{userId}/sources/{sourceId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && isCreatingOwnSubcollectionDoc(userId);
+      allow update: if isExistingOwner(userId) && isOwnerIdImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+  }
+}
