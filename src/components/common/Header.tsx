@@ -17,6 +17,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { signOut } from 'firebase/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { useTranslation } from 'react-i18next';
 
 
 
@@ -25,6 +27,7 @@ export function Header() {
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   if (pathname === '/') return null;
 
@@ -47,18 +50,19 @@ export function Header() {
         <a href={user ? "/dashboard" : "/"} className="flex items-center gap-3">
           <img src="/icon.png" alt="Logo" className="h-8 w-8 dark:invert" />
           <div className="text-2xl font-bold tracking-tighter font-headline text-foreground">
-            Argument Cartographer
+            {t('app_name')}
           </div>
         </a>
 
         <div className="flex items-center gap-4">
+          <LanguageSwitcher />
           <ThemeToggle />
           {isUserLoading ? (
             <div className="h-10 w-20 animate-pulse rounded-sm bg-muted-foreground/20" />
           ) : user ? (
             <div className="flex items-center gap-4">
               <Button asChild variant="secondary" className="font-bold border-2 border-primary/20 hover:border-primary transition-colors">
-                <Link href="/radar">Narrative Radar 📡</Link>
+                <Link href="/radar">{t('narrative_radar')} 📡</Link>
               </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -84,19 +88,19 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
                       <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Profile Settings</span>
+                      <span>{t('profile_settings')}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/profile">
                       <History className="mr-2 h-4 w-4" />
-                      <span>Usage Statistics</span>
+                      <span>{t('usage_statistics')}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>{t('logout')}</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -104,13 +108,13 @@ export function Header() {
           ) : (
             <div className="flex items-center gap-2">
               <Button asChild variant="secondary" className="mr-2 font-bold border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all">
-                <Link href="/radar">Narrative Radar 📡</Link>
+                <Link href="/radar">{t('narrative_radar')} 📡</Link>
               </Button>
               <Button asChild variant="ghost">
-                <Link href="/login">Login</Link>
+                <Link href="/login">{t('login')}</Link>
               </Button>
               <Button asChild>
-                <Link href="/signup">Sign Up</Link>
+                <Link href="/signup">{t('signup')}</Link>
               </Button>
             </div>
           )}

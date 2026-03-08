@@ -26,10 +26,21 @@ const sideBorderColors = {
   against: 'border-argument-against'
 }
 
+// Helper to safely extract hostname from a URL
+function getHostname(url: string | undefined | null): string {
+  if (!url || url === 'null' || url.trim() === '') return '';
+  try {
+    return new URL(url).hostname.replace('www.', '');
+  } catch {
+    return ''; // Invalid URL, return empty string
+  }
+}
+
 export function ArgumentCard({ node, isRoot = false, className }: ArgumentCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
 
-  const hostname = node.source ? new URL(node.source).hostname.replace('www.', '') : '';
+  const hostname = getHostname(node.source);
+  const isValidSource = hostname !== '' && node.source && node.source !== 'null';
 
   return (
     <div className={cn("group [perspective:1000px]", className)}>
@@ -64,7 +75,7 @@ export function ArgumentCard({ node, isRoot = false, className }: ArgumentCardPr
                 Evidence
               </Button>
             )}
-            {node.source && (
+            {isValidSource && (
               <a
                 href={node.source}
                 target="_blank"
@@ -99,7 +110,7 @@ export function ArgumentCard({ node, isRoot = false, className }: ArgumentCardPr
               <Repeat2 className="h-4 w-4" />
               Argument
             </Button>
-            {node.source && (
+            {isValidSource && (
               <a
                 href={node.source}
                 target="_blank"

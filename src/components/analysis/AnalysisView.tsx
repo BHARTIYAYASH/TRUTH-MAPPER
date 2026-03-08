@@ -24,20 +24,23 @@ export function AnalysisView({ analysisData, onReset, isSocialOpen, onSocialTogg
   const [viewMode, setViewMode] = useState<VisualizationMode>('balanced');
   const exportRef = useRef<HTMLDivElement>(null);
 
+  // Use passed data directly (it may be translated by parent)
+  const currentData = analysisData;
+
   const renderView = () => {
     switch (viewMode) {
       case 'balanced':
-        return <BalancedView data={analysisData.blueprint} />;
+        return <BalancedView data={currentData.blueprint} />;
       case 'tree':
-        return <TreeView data={analysisData.blueprint} />;
+        return <TreeView data={currentData.blueprint} />;
       case 'pillar':
-        return <PillarView data={analysisData.blueprint} />;
+        return <PillarView data={currentData.blueprint} />;
       case 'circular':
-        return <CircularView data={analysisData} />;
+        return <CircularView data={currentData} />;
       case 'flowchart':
-        return <FlowMapView data={analysisData} />;
+        return <FlowMapView data={currentData} />;
       case 'compass':
-        return <CompassView data={analysisData.blueprint} />;
+        return <CompassView data={currentData.blueprint} />;
       default:
         return (
           <div className="flex h-96 items-center justify-center rounded-lg border-2 border-dashed">
@@ -52,14 +55,14 @@ export function AnalysisView({ analysisData, onReset, isSocialOpen, onSocialTogg
       <AnalysisToolbar
         currentView={viewMode}
         onViewChange={setViewMode}
-        jsonData={analysisData.blueprint}
+        jsonData={currentData.blueprint}
         onReset={onReset}
         exportRef={exportRef}
         isSocialOpen={isSocialOpen}
         onSocialToggle={onSocialToggle}
       />
       <ScrollArea className="flex-grow">
-        <div ref={exportRef} className="bg-background p-4 md:p-8 export-container">
+        <div ref={exportRef} className="bg-background p-4 md:p-8 export-container transition-opacity duration-300">
           {renderView()}
         </div>
       </ScrollArea>

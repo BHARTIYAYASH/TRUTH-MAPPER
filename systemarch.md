@@ -1,200 +1,126 @@
-# Argument Atlas - System Architecture & Technical Documentation
+# Argument Cartographer: System Architecture & Technical Whitepaper
 
-## Overview
-
-**Argument Atlas** is a real-time argument analysis and visualization platform that uses AI to dissect claims, gather evidence from the web and social media, and present findings in multiple interactive visualization formats.
-
----
-
-## Tech Stack
-
-| Layer | Technology | Purpose |
-|-------|-----------|---------|
-| **Frontend** | Next.js 15 + React 18 | App Router, SSR, Server Actions |
-| **Styling** | TailwindCSS 3.4 + Radix UI | Utility-first CSS + Headless components |
-| **Animations** | Framer Motion 11 | Physics-based animations (Compass needle, etc.) |
-| **State/Forms** | React Hook Form + Zod | Form handling & schema validation |
-| **AI Framework** | Genkit 1.20 | AI orchestration, tool definitions, flows |
-| **LLM** | Google Gemini 2.5 Flash | Primary model for argument analysis |
-| **Web Search** | Firecrawl API | Web search & markdown scraping |
-| **Social Data** | Twitter/X API | Social pulse & tweet retrieval |
-| **Auth** | Firebase Auth + next-firebase-auth-edge | Client & edge authentication |
-| **Database** | Firestore | Storing saved argument maps |
-| **Export** | html-to-image | PNG/SVG export of visualizations |
+**Prepared for:** Technical Evaluators & Stakeholders
+**Version:** 1.0.0
 
 ---
 
-## Folder Structure
+## 1. Executive Summary
 
-```
-src/
-├── ai/                    # AI Layer
-│   ├── genkit.ts          # Genkit instance config (model, plugins)
-│   ├── flows/             # AI Flows (orchestrated prompts)
-│   │   └── generate-argument-blueprint.ts
-│   └── tools/             # Genkit Tools (callable by AI)
-│       ├── web-search.ts      # Firecrawl search
-│       ├── web-scraper.ts     # Firecrawl scraper
-│       └── twitter-search.ts  # Twitter API tool
-│
-├── app/                   # Next.js App Router
-│   ├── page.tsx           # Home/Analysis page
-│   ├── login/             # Auth pages
-│   ├── signup/
-│   ├── forgot-password/
-│   └── api/               # API routes (if any)
-│
-├── components/            # React Components
-│   ├── analysis/          # Visualization views
-│   │   ├── TreeView.tsx
-│   │   ├── BalancedView.tsx
-│   │   ├── CompassView.tsx
-│   │   ├── PillarView.tsx
-│   │   ├── CircularView.tsx
-│   │   ├── FlowchartView.tsx
-│   │   ├── SocialView.tsx
-│   │   ├── ArgumentCard.tsx
-│   │   └── AnalysisToolbar.tsx
-│   └── ui/                # Shadcn/Radix primitives
-│
-├── firebase/              # Firebase SDK wrappers
-│   ├── index.ts           # Client SDK init
-│   └── provider.tsx       # AuthProvider context
-│
-├── lib/                   # Utilities & Types
-│   ├── types.ts           # TypeScript interfaces
-│   ├── utils.ts           # Helpers (buildTree, cn, etc.)
-│   └── actions.ts         # Server Actions
-│
-└── hooks/                 # Custom React hooks
-```
+**Argument Cartographer** is an intelligent platform designed to combat misinformation and polarization by structurally analyzing arguments. Unlike traditional fact-checkers that simply label claims as "True" or "False," our system decomposes complex narratives into their atomic logical components—Theses, Claims, Evidence, and Counterclaims. By leveraging Generative AI (Google Gemini) alongside real-time web verification (Firecrawl) and social sentiment analysis (Twitter/X API), we provide users with a "Cartographic" map of the truth—navigable, multi-dimensional, and evidence-backed.
 
 ---
 
-## Architecture Diagram
+## 2. Unique Selling Propositions (USPs)
+
+### 🗺️ Dynamic Argument Mapping
+We don't just summarize text; we visualize logic. Our proprietary **Blueprint Engine** transforms unstructured debates into interactive nodes, allowing users to trace the lineage of a claim back to its primary source evidence.
+
+### 📡 Narrative Radar
+A real-time "Head-Up Display" for the information ecosystem. The Radar proactively monitors and analyzes high-velocity topics, pre-generating detailed maps for breaking news events before misinformation takes root.
+
+### ⚖️ "Brutally Honest" Credibility Scoring
+Moving beyond binary ratings, our **Credibility Engine** evaluates arguments on a spectrum (1-10) based on logical consistency, fallacy presence, and source quality. This provides a nuanced "Truth Score" that reflects the complexity of real-world discourse.
+
+### 🧠 Automated Fallacy Detection
+The system specifically hunts for rhetorical tricks (Ad Hominem, Straw Man, Slippery Slope) within arguments, educating users not just on *what* is being said, but *how* they are being manipulated.
+
+---
+
+## 3. System Architecture
+
+The application follows a **Modern Monolithic** architecture pattern using Next.js 15, optimized for server-side rendering (SSR) and Edge interactions.
+
+### 3.1 High-Level Diagram
 
 ```mermaid
-flowchart TB
-    subgraph Client["Browser (React/Next.js)"]
-        UI[UI Components]
-        Auth[Firebase Auth]
+graph TD
+    User([User]) -->|Interacts| Client[Next.js Client Layer]
+    
+    subgraph "Frontend Application (Next.js 15)"
+        Client -->|Visualizes| ReactFlow[Argument Maps]
+        Client -->|Visualizes| Recharts[Data Charts]
+        Client -->|Submits| ServerActions[Server Actions]
     end
 
-    subgraph ServerActions["Next.js Server Actions"]
-        HA[handleAnalysis]
+    subgraph "Edge & AI Orchestration"
+        ServerActions -->|Triggers| Genkit[Google Genkit Framework]
+        Genkit -->|Orchestrates| GeminiPro[Gemini 1.5 Pro]
+        
+        Genkit -->|Step 1: Context| ToolLayer[Tool Interface]
     end
 
-    subgraph AI["Genkit AI Layer"]
-        Flow[generateArgumentBlueprintFlow]
-        WS[webSearch Tool]
-        SC[webScraper Tool]
-        TW[twitterSearch Tool]
+    subgraph "External Intelligence"
+        ToolLayer -->|Search| Firecrawl[Firecrawl (Web Search)]
+        ToolLayer -->|Scrape| WebScraper[Markdown Scraper]
+        ToolLayer -->|Listen| TwitterAPI[Twitter v2 API]
     end
 
-    subgraph External["External APIs"]
-        FC[Firecrawl API]
-        GEM[Google Gemini API]
-        TWT[Twitter/X API]
+    subgraph "Data Persistence"
+        ServerActions -->|Read/Write| Firestore[(Firebase Firestore)]
+        Client -->|Auth State| FBAuth[Firebase Auth]
     end
 
-    subgraph DB["Firebase"]
-        FS[(Firestore)]
-    end
-
-    UI -->|Submit Claim| HA
-    HA -->|Invoke| Flow
-    Flow -->|Call| WS
-    Flow -->|Call| SC
-    Flow -->|Call| TW
-    WS --> FC
-    SC --> FC
-    TW --> TWT
-    Flow --> GEM
-    Flow -->|Returns Blueprint| HA
-    HA -->|Save| FS
-    HA -->|Response| UI
+    WebScraper -->|Raw Content| Genkit
+    TwitterAPI -->|Sentiment Data| Genkit
+    GeminiPro -->|JSON Blueprint| Genkit
+    Genkit -->|Validated Result| ServerActions
+    ServerActions -->|Persist| Firestore
 ```
 
----
+### 3.2 Technical Layers
 
-## Data Flow
+#### **A. Interaction Layer (Frontend)**
+-   **Framework:** Next.js 15 (App Router)
+-   **Styling:** Tailwind CSS 4 with custom "Jupiter" design system.
+-   **Visualization:** 
+    -   `React Flow` for node-based argument mapping.
+    -   `Recharts` for sentiment/credibility analytics.
+    -   `Framer Motion` for high-fidelity micro-interactions.
 
-1. **User Input**: User enters a claim/thesis in the UI.
-2. **Server Action**: `handleAnalysis` (in `lib/actions.ts`) receives the input.
-3. **AI Flow**: `generateArgumentBlueprintFlow` is invoked via Genkit.
-4. **Tool Calls**: The LLM calls:
-   - `webSearch` → Firecrawl searches trusted news outlets
-   - `webScraper` → Firecrawl scrapes full article markdown
-   - `twitterSearch` → Fetches relevant tweets
-5. **Analysis**: Gemini generates structured output:
-   - `blueprint`: Array of `ArgumentNode[]`
-   - `summary`, `credibilityScore`, `brutalHonestTake`, `keyPoints`
-   - `socialPulse`, `tweets`
-6. **Storage**: Result is saved to Firestore (if authenticated).
-7. **Visualization**: UI renders the data in multiple view modes.
+#### **B. Intelligence Layer (AI & Orchestration)**
+-   **Core Engine:** Google Genkit (TypeScript AI SDK).
+-   **Model:** Gemini 1.5 Pro (optimized for long-context reasoning).
+-   **Flow:** 
+    1.  **Decompose**: Break user query into search vectors.
+    2.  **Gather**: Parallel fetch from Firecrawl (News) and Twitter (Social).
+    3.  **Synthesize**: Feed aggregated context (up to 20k tokens) to Gemini.
+    4.  **Structure**: Enforce JSON schema validation via Zod for unwavering type safety.
 
----
-
-## Key Components
-
-### AI Flow: `generateArgumentBlueprintFlow`
-- **Location**: `src/ai/flows/generate-argument-blueprint.ts`
-- **Purpose**: Orchestrates the entire analysis pipeline
-- **Output Schema** (Zod):
-  ```typescript
-  {
-    thesis: string,
-    summary: string,
-    credibilityScore: number,
-    brutalHonestTake: string,
-    keyPoints: string[],
-    blueprint: ArgumentNode[],
-    socialPulse: string,
-    tweets: Tweet[]
-  }
-  ```
-
-### Visualization Components
-| View | Description |
-|------|-------------|
-| `TreeView` | Hierarchical tree with ArgumentCards |
-| `BalancedView` | Side-by-side For/Against columns |
-| `CompassView` | Gauge chart with weighted needle |
-| `PillarView` | Stacked pillar representation |
-| `CircularView` | Radial layout |
-| `FlowchartView` | Flowchart-style connections |
+#### **C. Data Layer (Backend)**
+-   **Database:** Firebase Firestore (NoSQL) for flexible document storage of Argument Maps.
+-   **Authentication:** Firebase Auth v9 with `next-firebase-auth-edge` for secure, middleware-gated routing.
 
 ---
 
-## Environment Variables
+## 4. Scalability & Performance
 
-| Variable | Purpose |
-|----------|---------|
-| `GOOGLE_GENAI_API_KEY` | Gemini API access |
-| `FIRECRAWL_API_KEY` | Web search & scraping |
-| `TWITTER_BEARER_TOKEN` | Twitter API access |
-| `FIREBASE_*` | Firebase project config |
-| `FIREBASE_SERVICE_ACCOUNT` | Admin SDK credentials |
+-   **Server Actions**: By shifting logic to the server, we reduce client-side bundle size and ensure API keys (Firecrawl, Google AI) never leak to the browser.
+-   **Edge Compatible**: The authentication and routing middleware are designed to run on Vercel Edge functions for near-instant global response times.
+-   **Optimistic UI**: The dashboard uses streaming responses to show partial progress (e.g., "Searching web...", "Analyzing claims...") to keep users engaged during complex AI processing.
 
 ---
 
-## Build & Run
+## 5. Deployment Strategy
 
-```bash
-# Development
-npm run dev          # Next.js on port 9002 (Turbopack)
-npm run genkit:dev   # Genkit dev server
+The system is fully containerized and compatible with modern PaaS providers, specifically optimized for **Vercel**.
 
-# Production
-npm run build
-npm run start
-```
+-   **Build Command**: `next build` processes static pages and compiles server functions.
+-   **Environment Management**: strictly relies on server-side environment variables for security.
+-   **CI/CD**: Git-triggered deployments ensure verifying every commit before production release.
 
 ---
 
-## Security Considerations
+## 6. Future Scope
 
-- Firebase Auth for user authentication
-- Firestore Security Rules for data access control
-- Server Actions validate auth tokens before Firestore writes
-- API keys are server-side only (not exposed to client)
+The roadmap for Argument Cartographer extends its capabilities into broader societal impacts:
+
+1.  **Gamification "Truth Quest"**: Award users badges for identifying fallacies and contributing verified evidence, turning media literacy into a competitive game.
+2.  **Browser Extension**: A "hover-to-verify" extension that overlays Argument Maps directly onto news sites and social media feeds (Twitter/Reddit).
+3.  **Multi-Language Support**: Leveraging Gemini's polyglot capabilities to map arguments in Hindi, Spanish, and French, breaking language barriers in global discourse.
+4.  **API-First Approach**: Exposing the `generateArgumentBlueprint` flow as a public API for third-party developers to integrate truth-mapping into their own apps.
+5.  **Blockchain Evidence Logging**: Hashing finalized argument maps to a public ledger to create an immutable record of truth for historical preservation.
+
+---  
+
+**Argument Cartographer** is not just a tool; it is infrastructure for a more informed, logical, and less polarized internet.

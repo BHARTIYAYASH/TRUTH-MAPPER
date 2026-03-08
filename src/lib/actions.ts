@@ -178,9 +178,35 @@ export async function getSavedAnalysis(
 
     const analysisResult: AnalysisResult = JSON.parse(docData.jsonData);
     return { data: analysisResult, error: null };
-
   } catch (e: any) {
     console.error('Error fetching saved analysis:', e);
     return { data: null, error: `Failed to load analysis: ${e.message}` };
+  }
+}
+
+/**
+ * Handles the "Ask More" chat functionality.
+ */
+import { askMoreFlow } from '@/ai/flows/ask-more';
+
+export async function handleAskMore(
+  userQuery: string,
+  analysisResult: AnalysisResult,
+  history: { role: 'user' | 'model'; content: string }[] = []
+): Promise<{ answer: string | null; error: string | null }> {
+  try {
+    const analysisContext = JSON.stringify(analysisResult);
+
+    // Call the AI flow
+    const response = await askMoreFlow({
+      userQuery,
+      analysisContext,
+      chatHistory: history
+    });
+
+    return { answer: response.answer, error: null };
+  } catch (e: any) {
+    console.error("Ask More Flow failed:", e);
+    return { answer: null, error: e.message || "Failed to generate answer." };
   }
 }

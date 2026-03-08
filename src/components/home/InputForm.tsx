@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -16,19 +17,20 @@ import { useToast } from '@/hooks/use-toast';
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 function SubmitButton() {
-    const { pending } = useFormStatus();
-    return (
-      <Button
-        type="submit"
-        size="lg"
-        className="w-full"
-        disabled={pending}
-      >
-        {pending ? <LoadingSpinner className="mr-2 h-5 w-5" /> : <Sparkles className="mr-2 h-5 w-5" />}
-        {pending ? 'Analyzing...' : 'Analyze Arguments'}
-      </Button>
-    );
-  }
+  const { pending } = useFormStatus();
+  const { t } = useTranslation();
+  return (
+    <Button
+      type="submit"
+      size="lg"
+      className="w-full"
+      disabled={pending}
+    >
+      {pending ? <LoadingSpinner className="mr-2 h-5 w-5" /> : <Sparkles className="mr-2 h-5 w-5" />}
+      {pending ? t('analysis_running') : t('btn_analyze')}
+    </Button>
+  );
+}
 
 type InputType = 'Topic' | 'URL' | 'Document';
 
@@ -37,6 +39,7 @@ export function InputForm({ formAction, authToken }: { formAction: (formData: Fo
   const [inputValue, setInputValue] = useState('');
   const [isParsing, setIsParsing] = useState(false);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -61,8 +64,8 @@ export function InputForm({ formAction, authToken }: { formAction: (formData: Fo
               text += content.items.map(item => ('str' in item ? item.str : '')).join(' ');
             }
             setInputValue(text);
-            toast({ title: 'Success', description: 'File parsed successfully.'});
-          } catch(err) {
+            toast({ title: 'Success', description: 'File parsed successfully.' });
+          } catch (err) {
             console.error('Error parsing PDF:', err);
             toast({
               variant: "destructive",
@@ -91,7 +94,7 @@ export function InputForm({ formAction, authToken }: { formAction: (formData: Fo
       reader.onload = (e) => {
         setInputValue(e.target?.result as string);
         setIsParsing(false);
-        toast({ title: 'Success', description: 'File parsed successfully.'});
+        toast({ title: 'Success', description: 'File parsed successfully.' });
       };
       reader.onerror = () => {
         toast({
@@ -108,11 +111,11 @@ export function InputForm({ formAction, authToken }: { formAction: (formData: Fo
   const getPlaceholder = () => {
     switch (inputType) {
       case 'Topic':
-        return 'e.g., The pros and cons of universal basic income';
+        return t('placeholder_topic');
       case 'URL':
-        return 'e.g., https://www.example.com/article';
+        return t('placeholder_url');
       case 'Document':
-        return 'Paste your document text here or upload a file...';
+        return t('placeholder_document');
     }
   };
 
@@ -127,40 +130,40 @@ export function InputForm({ formAction, authToken }: { formAction: (formData: Fo
             setInputValue(''); // Reset input value when changing tabs
           }}>
             <TabsList className="grid w-full grid-cols-3 bg-transparent p-0">
-              <TabsTrigger value="Topic" className="rounded-sm border-2 border-transparent data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none">Topic</TabsTrigger>
-              <TabsTrigger value="URL" className="rounded-sm border-2 border-transparent data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none">URL</TabsTrigger>
-              <TabsTrigger value="Document" className="rounded-sm border-2 border-transparent data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none">Document</TabsTrigger>
+              <TabsTrigger value="Topic" className="rounded-sm border-2 border-transparent data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none">{t('tab_topic')}</TabsTrigger>
+              <TabsTrigger value="URL" className="rounded-sm border-2 border-transparent data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none">{t('tab_url')}</TabsTrigger>
+              <TabsTrigger value="Document" className="rounded-sm border-2 border-transparent data-[state=active]:border-border data-[state=active]:bg-background data-[state=active]:shadow-none">{t('tab_document')}</TabsTrigger>
             </TabsList>
-            
+
             <div className="p-4">
-                <input type="hidden" name="inputType" value={inputType} />
-                {authToken && <input type="hidden" name="authToken" value={authToken} />}
-                {inputType === 'URL' ? (
-                     <Input
-                        name="input"
-                        type="url"
-                        placeholder={getPlaceholder()}
-                        className="h-14 text-base"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        required
-                    />
-                ) : (
-                    <Textarea
-                        name="input"
-                        placeholder={getPlaceholder()}
-                        className="min-h-[140px] text-base"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        readOnly={isParsing}
-                        required
-                    />
-                )}
-                {inputType === 'Document' && (
-                    <div className="mt-4">
-                        <Input type="file" onChange={handleFileChange} accept=".txt,.md,.pdf" className="text-sm"/>
-                    </div>
-                )}
+              <input type="hidden" name="inputType" value={inputType} />
+              {authToken && <input type="hidden" name="authToken" value={authToken} />}
+              {inputType === 'URL' ? (
+                <Input
+                  name="input"
+                  type="url"
+                  placeholder={getPlaceholder()}
+                  className="h-14 text-base"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  required
+                />
+              ) : (
+                <Textarea
+                  name="input"
+                  placeholder={getPlaceholder()}
+                  className="min-h-[140px] text-base"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  readOnly={isParsing}
+                  required
+                />
+              )}
+              {inputType === 'Document' && (
+                <div className="mt-4">
+                  <Input type="file" onChange={handleFileChange} accept=".txt,.md,.pdf" className="text-sm" />
+                </div>
+              )}
             </div>
           </Tabs>
           <div className="px-4 pb-4">

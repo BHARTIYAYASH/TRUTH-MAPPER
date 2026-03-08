@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -26,8 +27,10 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const auth = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+    // ... logic remains same
     e.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -45,6 +48,7 @@ export default function LoginForm() {
       Cookies.set('AuthToken', token, { expires: 1, path: '/' });
       router.push('/');
     } catch (e: unknown) {
+      // ... error handling
       if (e instanceof FirebaseError) {
         switch (e.code) {
           case 'auth/user-not-found':
@@ -71,15 +75,15 @@ export default function LoginForm() {
     <div className="container flex h-[calc(100vh-80px)] items-center justify-center">
       <Card className="mx-auto max-w-sm border-4 shadow-[8px_8px_0px_hsl(var(--border))]">
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">{t('login_title')}</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            {t('login_desc')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -92,9 +96,9 @@ export default function LoginForm() {
             </div>
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{t('password')}</Label>
                 <Link href="/forgot-password" className="ml-auto inline-block text-sm underline text-muted-foreground hover:text-primary">
-                  Forgot your password?
+                  {t('forgot_password')}
                 </Link>
               </div>
               <Input
@@ -111,13 +115,13 @@ export default function LoginForm() {
             )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <LoadingSpinner className="mr-2 h-4 w-4" />}
-              Login
+              {t('btn_login')}
             </Button>
           </form>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{' '}
+            {t('dont_have_account')}{' '}
             <Link href="/signup" className="underline">
-              Sign up
+              {t('signup')}
             </Link>
           </div>
         </CardContent>

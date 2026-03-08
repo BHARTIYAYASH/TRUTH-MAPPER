@@ -45,6 +45,7 @@ const TRUSTED_NEWS_OUTLETS: string[] = [
   "apnews.com",
   "bloomberg.com",
   "cnbc.com",
+  "pib.gov.in",
 ];
 
 /**

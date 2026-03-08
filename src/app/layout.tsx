@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Header } from '@/components/common/Header';
 import { ThemeProvider } from '@/components/common/ThemeProvider';
 import { FirebaseClientProvider } from '@/firebase';
+import { I18nProvider } from '@/components/I18nProvider';
 
 export const metadata: Metadata = {
   title: 'Argument Cartographer',
@@ -32,11 +33,13 @@ export default function RootLayout({
             defaultTheme="dark"
             disableTransitionOnChange
           >
-            <div className="relative flex min-h-screen w-full flex-col">
-              <Header />
-              <main className="flex-1">{children}</main>
-            </div>
-            <Toaster />
+            <I18nProvider>
+              <div className="relative flex min-h-screen w-full flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+              </div>
+              <Toaster />
+            </I18nProvider>
           </ThemeProvider>
         </FirebaseClientProvider>
       </body>

@@ -7,6 +7,7 @@ import { AnalysisAndSocialLayout } from '@/components/analysis/AnalysisAndSocial
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Map } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface RadarDetailProps {
     params: Promise<{ id: string }>;
@@ -14,6 +15,7 @@ interface RadarDetailProps {
 
 export default function RadarDetailPage({ params }: RadarDetailProps) {
     const { id } = React.use(params);
+    const { t } = useTranslation();
     const topic = RADAR_TOPICS.find(t => t.id === id);
 
     if (!topic) {
@@ -32,15 +34,15 @@ export default function RadarDetailPage({ params }: RadarDetailProps) {
                 <div className="container mx-auto max-w-7xl flex items-center justify-between">
                     <Link href="/radar" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
                         <ArrowLeft className="h-4 w-4" />
-                        Back to Narrative Radar
+                        {t('back_to_radar')}
                     </Link>
                     <div className="font-bold text-lg hidden md:block">
-                        {topic.title}
+                        {t(`radar_title_${topic.id}`) || topic.title}
                     </div>
                     <Button asChild size="sm" className="gap-2">
                         <Link href="/">
                             <Map className="h-4 w-4" />
-                            Map Your Own Topic
+                            {t('map_own_topic')}
                         </Link>
                     </Button>
                 </div>

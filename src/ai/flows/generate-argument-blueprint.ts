@@ -221,6 +221,8 @@ const generateArgumentBlueprintFlow = ai.defineFlow(
 
     // Step 5: Construct Context
     let context = "";
+    let isLimitedAnalysis = false;
+
     if (scrapedDocs.length > 0) {
       context = scrapedDocs.map((doc, index) => `
 --- SOURCE ${index + 1} ---
@@ -228,8 +230,8 @@ URL: ${doc.url}
 Extracted Text:
 ${doc.content.substring(0, 12000)} 
 `).join("\n\n");
-    } else {
-      // Fallback: If scraping failed completely, use snippets from search
+    } else if (searchResults.length > 0) {
+      // Fallback 1: Use snippets from search
       console.warn("[Flow] Scraping failed or returned no content. Using search snippets as context.");
       context = searchResults.map(r => `
 --- SOURCE (Snippet Only) ---
@@ -237,9 +239,20 @@ URL: ${r.link}
 Snippet:
 ${r.snippet}
 `).join("\n\n");
+    } else {
+      // Fallback 2: No search results at all (API credits depleted)
+      // Use the user's raw query as the "context" - limited analysis mode
+      console.warn("[Flow] No external sources available (API credits may be depleted). Using user query only.");
+      isLimitedAnalysis = true;
+      context = `
+--- USER QUERY (No External Sources Available) ---
+Topic: ${input.input}
+
+NOTE: External search APIs are unavailable. Generate an analysis based solely on your training knowledge about this topic. Clearly indicate that sources could not be verified in real-time.
+`;
     }
 
-    console.log(`[Flow] Context prepared. Length: ${context.length} chars.`);
+    console.log(`[Flow] Context prepared. Length: ${context.length} chars. Limited Mode: ${isLimitedAnalysis}`);
 
     // Step 6: Run Main Analysis with prepared Context
     // Pass 'context' to the prompt

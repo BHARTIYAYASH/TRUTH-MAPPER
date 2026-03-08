@@ -26,6 +26,7 @@ import {
 import Link from 'next/link';
 import type { ArgumentMapDocument, AnalysisResult } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 // --- Sub-components (could be extracted later) ---
 
@@ -78,44 +79,45 @@ function RecentActivityItem({ item }: { item: ArgumentMapDocument }) {
 }
 
 function DetailedBreakdown({ stats }: { stats: any }) {
+  const { t } = useTranslation();
   return (
     <Card className="col-span-1 lg:col-span-2">
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Detailed Breakdown</CardTitle>
+        <CardTitle className="text-base font-semibold">{t('stats_breakdown')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm">
 
           {/* Content Analysis Stats */}
           <div className="space-y-4">
-            <h4 className="font-medium text-muted-foreground uppercase text-xs tracking-wider">Content Analysis</h4>
+            <h4 className="font-medium text-muted-foreground uppercase text-xs tracking-wider">{t('stats_content_analysis')}</h4>
             <div className="flex justify-between py-2 border-b border-dashed">
-              <span>Documents Processed</span>
+              <span>{t('stats_docs_processed')}</span>
               <span className="font-mono font-medium">{stats.total}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-dashed">
-              <span>Arguments Identified</span>
+              <span>{t('stats_args_identified')}</span>
               <span className="font-mono font-medium">{stats.argsIdentified}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-dashed">
-              <span>Sources Analyzed</span>
+              <span>{t('stats_sources_analyzed')}</span>
               <span className="font-mono font-medium">{stats.sourcesAnalyzed}</span>
             </div>
           </div>
 
           {/* Quality Metrics */}
           <div className="space-y-4">
-            <h4 className="font-medium text-muted-foreground uppercase text-xs tracking-wider">Quality Metrics</h4>
+            <h4 className="font-medium text-muted-foreground uppercase text-xs tracking-wider">{t('stats_quality_metrics')}</h4>
             <div className="flex justify-between py-2 border-b border-dashed">
-              <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3 text-amber-500" /> Fallacies Detected</span>
+              <span className="flex items-center gap-2"><AlertTriangle className="h-3 w-3 text-amber-500" /> {t('stats_fallacies')}</span>
               <span className="font-mono font-medium">{stats.fallaciesDetected}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-dashed">
-              <span className="flex items-center gap-2"><TrendingUp className="h-3 w-3 text-blue-500" /> Avg. Analysis Depth</span>
+              <span className="flex items-center gap-2"><TrendingUp className="h-3 w-3 text-blue-500" /> {t('stats_avg_depth')}</span>
               <span className="font-mono font-medium">{stats.avgDepth} levels</span>
             </div>
             <div className="flex justify-between py-2 border-b border-dashed">
-              <span className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-emerald-500" /> Accuracy Score</span>
+              <span className="flex items-center gap-2"><CheckCircle2 className="h-3 w-3 text-emerald-500" /> {t('stats_accuracy')}</span>
               <span className="font-mono font-medium text-emerald-600">--</span>
             </div>
           </div>
@@ -133,6 +135,7 @@ export default function ProfilePage() {
   const firestore = useFirestore();
   const [historyLimit, setHistoryLimit] = useState(5);
   const [activeTab, setActiveTab] = useState('usage');
+  const { t } = useTranslation();
 
   // Fetch History Data
   const historyCollectionRef = useMemoFirebase(() => {
@@ -215,33 +218,33 @@ export default function ProfilePage() {
         return (
           <div className="space-y-6">
             <div className="mb-6">
-              <h2 className="text-xl font-bold">Account Information</h2>
+              <h2 className="text-xl font-bold">{t('account_information')}</h2>
               <p className="text-sm text-muted-foreground">Manage your personal and academic details</p>
             </div>
             <Card>
               <CardContent className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Full Name</label>
+                    <label className="text-sm font-medium">{t('profile_full_name')}</label>
                     <div className="p-2 border rounded-md bg-muted/50 text-sm">
                       {user.displayName || 'Not provided'}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Email Address</label>
+                    <label className="text-sm font-medium">{t('email')}</label>
                     <div className="p-2 border rounded-md bg-muted/50 text-sm">
                       {user.email}
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-sm font-medium">Account ID</label>
+                    <label className="text-sm font-medium">{t('profile_account_id')}</label>
                     <div className="p-2 border rounded-md bg-muted/50 font-mono text-xs">
                       {user.uid}
                     </div>
                   </div>
                 </div>
                 <div className="pt-4">
-                  <Button variant="outline">Edit Profile</Button>
+                  <Button variant="outline">{t('profile_edit')}</Button>
                 </div>
               </CardContent>
             </Card>
@@ -251,7 +254,7 @@ export default function ProfilePage() {
         return (
           <div className="space-y-6">
             <div className="mb-6">
-              <h2 className="text-xl font-bold">Analysis Preferences</h2>
+              <h2 className="text-xl font-bold">{t('analysis_preferences')}</h2>
               <p className="text-sm text-muted-foreground">Customize how the AI analyzes arguments</p>
             </div>
             <Card>
@@ -272,7 +275,7 @@ export default function ProfilePage() {
             {/* Header Section */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold">Usage Statistics</h2>
+                <h2 className="text-xl font-bold">{t('usage_statistics')}</h2>
                 <p className="text-sm text-muted-foreground">Track your analysis activity and productivity metrics</p>
               </div>
 
@@ -286,26 +289,26 @@ export default function ProfilePage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
-                label="Analyses Created"
+                label={t('stats_analyses_created')}
                 value={stats.total}
                 subtext="Total maps generated"
                 trend={stats.total > 0 ? "+1" : ""}
                 icon={FileText}
               />
               <StatCard
-                label="Visualizations"
+                label={t('stats_visualizations')}
                 value={stats.visualizations}
                 subtext="Views generated"
                 icon={BarChart3}
               />
               <StatCard
-                label="Time Spent"
+                label={t('stats_time_spent')}
                 value={`${stats.time}h`}
                 subtext="Avg: 25m / analysis"
                 icon={Clock}
               />
               <StatCard
-                label="Shared Maps"
+                label={t('stats_shared_maps')}
                 value={stats.shared}
                 subtext="External shares"
                 icon={Share2}
@@ -323,15 +326,15 @@ export default function ProfilePage() {
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Preferred View</span>
+                    <span className="text-muted-foreground">{t('preferences_view')}</span>
                     <div className="px-2 py-1 bg-muted rounded text-xs font-medium">Flow Map</div>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">Export Format</span>
+                    <span className="text-muted-foreground">{t('preferences_export')}</span>
                     <div className="px-2 py-1 bg-muted rounded text-xs font-medium">PNG</div>
                   </div>
                   <div className="pt-4 mt-2 border-t">
-                    <Button variant="outline" size="sm" className="w-full" onClick={() => setActiveTab('preferences')}>Edit Preferences</Button>
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => setActiveTab('preferences')}>{t('profile_edit')}</Button>
                   </div>
                 </CardContent>
               </Card>
@@ -373,7 +376,7 @@ export default function ProfilePage() {
         {/* 1. Sidebar Navigation */}
         <div className="w-full md:w-64 flex-shrink-0 space-y-8">
           <div className="pl-2">
-            <h1 className="text-3xl font-bold font-headline mb-1 tracking-tight">Settings</h1>
+            <h1 className="text-3xl font-bold font-headline mb-1 tracking-tight">{t('profile_settings')}</h1>
             <p className="text-sm text-muted-foreground">Manage your account preferences</p>
           </div>
 
@@ -385,7 +388,7 @@ export default function ProfilePage() {
             >
               {activeTab === 'usage' && <div className="absolute left-0 top-1 bottom-1 w-1 bg-primary rounded-r-md"></div>}
               <BarChart3 className="h-4 w-4" />
-              Usage Statistics
+              {t('usage_statistics')}
             </Button>
             <Button
               variant="ghost"
@@ -394,7 +397,7 @@ export default function ProfilePage() {
             >
               {activeTab === 'account' && <div className="absolute left-0 top-1 bottom-1 w-1 bg-primary rounded-r-md"></div>}
               <User className="h-4 w-4" />
-              Account Information
+              {t('account_information')}
             </Button>
             <Button
               variant="ghost"
@@ -403,15 +406,15 @@ export default function ProfilePage() {
             >
               {activeTab === 'preferences' && <div className="absolute left-0 top-1 bottom-1 w-1 bg-primary rounded-r-md"></div>}
               <Settings className="h-4 w-4" />
-              Analysis Preferences
+              {t('analysis_preferences')}
             </Button>
             <Button variant="ghost" className="justify-start gap-3 px-3 text-muted-foreground hover:bg-muted/50 opacity-50 cursor-not-allowed">
               <Accessibility className="h-4 w-4" />
-              Accessibility
+              {t('accessibility')}
             </Button>
             <Button variant="ghost" className="justify-start gap-3 px-3 text-muted-foreground hover:bg-muted/50 opacity-50 cursor-not-allowed">
               <Shield className="h-4 w-4" />
-              Security & Privacy
+              {t('security_privacy')}
             </Button>
           </nav>
 
